@@ -30,10 +30,9 @@ api="https://quay.io/api/v1"
 started_at=$($date +%s)
 
 ## Read input and env
-release_tag="$1"
+version="$1"
 # Service images
-images="${IMAGES:-zipkin-aws}"
-dirs="${DIRS:-zipkin-aws}"
+image="${IMAGE_NAME:-zipkin-aws}"
 # Remotes, auth
 docker_organization="${DOCKER_ORGANIZATION:-openzipkin}"
 quayio_oauth2_token="$QUAYIO_OAUTH2_TOKEN"
@@ -51,51 +50,12 @@ checkout-target-branch () {
     git checkout -B "$target_git_branch"
 }
 
-bump-zipkin-version () {
-    local version="$1"; shift
-    local images="$@"
-    local modified=false
-
-    for image in $images; do
-        echo "Bumping ZIPKIN_AWS_VERSION in the Dockerfile of $image..."
-        dockerfile="${image}/Dockerfile"
-        sed -i.bak -e "s/ENV ZIPKIN_AWS_VERSION .*/ENV ZIPKIN_AWS_VERSION ${version}/" "$dockerfile"
-        if ! diff "${dockerfile}.bak" "${dockerfile}" > /dev/null; then
-            modified=true
-        fi
-        rm "${dockerfile}.bak"
-        git add "$dockerfile"
-    done
-
-    if "$modified"; then
-        git commit -m "Bump ZIPKIN_AWS_VERSION to $version"
-        git push --set-upstream $git_remote $target_git_branch
-    else
-        echo "ZIPKIN_AWS_VERSION was already ${version}, no commit to make"
-    fi
-}
-
-create-and-push-tag () {
-    local tag="$1"
-    echo "Creating and pushing tag $tag..."
-    git tag "$tag" --force
-    git push "$git_remote" "$tag" --force
-}
-
 fetch-last-build () {
     local tag="$1"
     local image="$2"
     local repo="${docker_organization}/${image}"
 
     curl -s "${api}/repository/${repo}/build/" | jq ".builds | map(select(.tags | contains([\"${tag}\"])))[0]"
-}
-
-build-started-after-me () {
-    local build="$1"
-
-    build_started_at_str="$(echo "$build" | jq '.started' -r)"
-    build_started_at="$($date --date "$build_started_at_str" +%s)"
-    [[ "$started_at" -lt "$build_started_at" ]] || return 1
 }
 
 wait-for-build-to-start () {
@@ -107,7 +67,7 @@ wait-for-build-to-start () {
     while [[ "$timeout" -gt 0 ]]; do
         echo >&2 "Waiting for the build of $image for version $tag to start for $timeout more seconds..."
         build="$(fetch-last-build "$tag" "$image")"
-        if [[ "$build" != "null" ]] && build-started-after-me "$build"; then
+        if [[ "$build" != "null" ]]; then
             build_id=$(echo "$build" | jq '.id' -r)
             echo >&2 "Build started: https://quay.io/repository/$repo/build/$build_id"
             echo "$build_id"
@@ -211,13 +171,11 @@ retry () {
 
 main () {
     # Check that the version is something we like
-    if ! echo "$release_tag" | grep -E '^release-[0-9]+\.[0-9]+\.[0-9]+$' -q; then
-        echo "Usage: $0 <release_tag>"
-        echo "Where release_tag must be release-<major>.<minor>.<subminor>"
+    if ! echo "$version" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' -q; then
+        echo "Usage: $0 <version>"
+        echo "Where version must be <major>.<minor>.<subminor>"
         exit 1
     fi
-
-    version="$(echo ${release_tag} | sed -e 's/^release-//')"
 
     # The git tags we'll create
     major_tag=$(echo "$version" | cut -f1 -d. -s)
@@ -225,15 +183,13 @@ main () {
     subminor_tag="$version"
 
     action_plan="
-    checkout-target-branch                                                         2>&1 | prefix checkout-target-branch
-    bump-zipkin-version     $version $dirs                                         2>&1 | prefix bump-zipkin-version
-    create-and-push-tag     $subminor_tag                                          2>&1 | prefix tag-images
-    wait-for-builds         $subminor_tag $images                                  2>&1 | prefix wait-for-builds
-    sync-quay-tags          $subminor_tag \"$minor_tag $major_tag latest\" $images 2>&1 | prefix sync-quay-tags
-    sync-to-dockerhub       $subminor_tag $images                                  2>&1 | prefix sync-${subminor_tag}-to-dockerhub
-    sync-to-dockerhub       $minor_tag $images                                     2>&1 | prefix sync-${minor_tag}-to-dockerhub
-    sync-to-dockerhub       $major_tag $images                                     2>&1 | prefix sync-${major_tag}-to-dockerhub
-    sync-to-dockerhub       latest $images                                         2>&1 | prefix sync-latest-to-dockerhub
+    checkout-target-branch                                                        2>&1 | prefix checkout-target-branch
+    wait-for-builds         $subminor_tag $image                                  2>&1 | prefix wait-for-build
+    sync-quay-tags          $subminor_tag \"$minor_tag $major_tag latest\" $image 2>&1 | prefix sync-quay-tags
+    sync-to-dockerhub       $subminor_tag $image                                  2>&1 | prefix sync-${subminor_tag}-to-dockerhub
+    sync-to-dockerhub       $minor_tag $image                                     2>&1 | prefix sync-${minor_tag}-to-dockerhub
+    sync-to-dockerhub       $major_tag $image                                     2>&1 | prefix sync-${major_tag}-to-dockerhub
+    sync-to-dockerhub       latest $image                                         2>&1 | prefix sync-latest-to-dockerhub
     "
 
     echo "Starting release $version. Action plan:"
@@ -242,10 +198,11 @@ main () {
     eval "$action_plan"
 
     echo
-    echo "All done. Now it's time to update docker-compose*.yml with the new versions and validate that the new images work."
+    echo "All done. Now it's time to update docker-compose.yml with the new version and validate that the new image works."
     echo "Once you're done with that:"
     echo
-    echo "    git commit docker-compose*.yml -m 'Release $version'; git push"
+    echo "    git commit docker-compose.yml -m 'Release $version'; git push"
 }
 
 main
+

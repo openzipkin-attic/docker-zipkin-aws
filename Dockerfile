@@ -11,16 +11,12 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 #
-FROM openzipkin/zipkin:1.23.1
+FROM openzipkin/zipkin:1.23.2
 MAINTAINER OpenZipkin "http://zipkin.io/"
 
 ENV ZIPKIN_AWS_REPO https://jcenter.bintray.com
-ENV ZIPKIN_AWS_VERSION 0.2.3
+ENV ZIPKIN_AWS_VERSION 0.2.4
 
-RUN apk add unzip && \ 
-  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar && \
-  unzip sqs.jar -d sqs && \
-  rm sqs.jar && \
-  apk del unzip
+RUN curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar
 
-CMD test -n "$STORAGE_TYPE" && source .${STORAGE_TYPE}_profile; java ${JAVA_OPTS} -Dloader.path=sqs -Dspring.profiles.active=sqs -cp . org.springframework.boot.loader.PropertiesLauncher
+CMD test -n "$STORAGE_TYPE" && source .${STORAGE_TYPE}_profile; java ${JAVA_OPTS} -Dloader.path=sqs.jar -Dspring.profiles.active=sqs -cp . org.springframework.boot.loader.PropertiesLauncher

@@ -11,11 +11,11 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 #
-FROM openzipkin/zipkin:1.23.2
+FROM openzipkin/zipkin:1.23.4
 MAINTAINER OpenZipkin "http://zipkin.io/"
 
 ENV ZIPKIN_AWS_REPO https://jcenter.bintray.com
-ENV ZIPKIN_AWS_VERSION 0.2.4
+ENV ZIPKIN_AWS_VERSION 0.2.5
 
 RUN apk add unzip && \ 
   curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar && \

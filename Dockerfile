@@ -11,16 +11,19 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 #
-FROM openzipkin/zipkin:1.23.3
+FROM openzipkin/zipkin:1.26.0
 MAINTAINER OpenZipkin "http://zipkin.io/"
 
 ENV ZIPKIN_AWS_REPO https://jcenter.bintray.com
-ENV ZIPKIN_AWS_VERSION 0.2.5
+ENV ZIPKIN_AWS_VERSION 0.3.2
 
 RUN apk add unzip && \ 
   curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar && \
+  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-kinesis/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-kinesis-$ZIPKIN_AWS_VERSION-module.jar > kinesis.jar && \
   unzip sqs.jar -d sqs && \
+  unzip kinesis.jar -d kinesis && \
   rm sqs.jar && \
+  rm kinesis.jar && \
   apk del unzip
 
-CMD test -n "$STORAGE_TYPE" && source .${STORAGE_TYPE}_profile; java ${JAVA_OPTS} -Dloader.path=sqs -Dspring.profiles.active=sqs -cp . org.springframework.boot.loader.PropertiesLauncher
+CMD test -n "$STORAGE_TYPE" && source .${STORAGE_TYPE}_profile; java ${JAVA_OPTS} -Dloader.path=sqs,kinesis -Dspring.profiles.active=sqs,kinesis -cp . org.springframework.boot.loader.PropertiesLauncher

@@ -8,7 +8,7 @@ This repository contains the Docker build definition and release process for
 
 This layers Amazon Web Services support on the base [zipkin docker image](https://github.com/openzipkin/docker-zipkin).
 
-Currently, this adds SQS Collector support
+Currently, this adds a SQS Collector, and a Kinesis Streams Collector
 
 ## Running
 
@@ -40,3 +40,8 @@ In docker, the following can also be set:
 ### SQS
 
 SQS Configuration variables are detailed [here](https://github.com/openzipkin/zipkin-aws/tree/master/autoconfigure/collector-sqs#configuration).
+
+
+### Kinesis
+
+Kinesis Configuration variables are detailed [here](https://github.com/openzipkin/zipkin-aws/tree/master/autoconfigure/collector-kinesis#configuration).

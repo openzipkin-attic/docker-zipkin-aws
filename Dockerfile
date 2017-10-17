@@ -15,15 +15,19 @@ FROM openzipkin/zipkin:2.2.1
 MAINTAINER OpenZipkin "http://zipkin.io/"
 
 ENV ZIPKIN_AWS_REPO https://jcenter.bintray.com
-ENV ZIPKIN_AWS_VERSION 0.7.1
+ENV ZIPKIN_AWS_VERSION 0.8.0
 
 RUN apk add unzip && \ 
   curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar && \
   curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-kinesis/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-kinesis-$ZIPKIN_AWS_VERSION-module.jar > kinesis.jar && \
+  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-storage-xray/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-storage-xray-$ZIPKIN_AWS_VERSION-module.jar > xray.jar && \
+  echo > .xray_profile && \
   unzip sqs.jar -d sqs && \
   unzip kinesis.jar -d kinesis && \
+  unzip xray.jar -d xray && \
   rm sqs.jar && \
   rm kinesis.jar && \
+  rm xray.jar && \
   apk del unzip
 
-CMD test -n "$STORAGE_TYPE" && source .${STORAGE_TYPE}_profile; java ${JAVA_OPTS} -Dloader.path=sqs,kinesis -Dspring.profiles.active=sqs,kinesis -cp . org.springframework.boot.loader.PropertiesLauncher
+CMD test -n "$STORAGE_TYPE" && source .${STORAGE_TYPE}_profile; java ${JAVA_OPTS} -Dloader.path=sqs,kinesis,xray -Dspring.profiles.active=sqs,kinesis,xray -cp . org.springframework.boot.loader.PropertiesLauncher

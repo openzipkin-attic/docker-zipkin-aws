@@ -15,7 +15,7 @@ FROM openzipkin/zipkin:2.8.1
 MAINTAINER OpenZipkin "http://zipkin.io/"
 
 ENV ZIPKIN_AWS_REPO https://jcenter.bintray.com
-ENV ZIPKIN_AWS_VERSION 10.0.0
+ENV ZIPKIN_AWS_VERSION 0.10.0
 
 RUN apk add unzip && \ 
   curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar && \

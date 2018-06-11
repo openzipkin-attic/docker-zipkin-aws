@@ -1,5 +1,5 @@
 #
-# Copyright 2015-2016 The OpenZipkin Authors
+# Copyright 2015-2018 The OpenZipkin Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 # in compliance with the License. You may obtain a copy of the License at
@@ -11,23 +11,26 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 #
-FROM openzipkin/zipkin:2.8.3
+FROM openzipkin/zipkin:2.9.1
 MAINTAINER OpenZipkin "http://zipkin.io/"
 
 ENV ZIPKIN_AWS_REPO https://jcenter.bintray.com
-ENV ZIPKIN_AWS_VERSION 0.10.1
+ENV ZIPKIN_AWS_VERSION 0.11.0
 
 RUN apk add unzip && \ 
   curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar && \
   curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-kinesis/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-kinesis-$ZIPKIN_AWS_VERSION-module.jar > kinesis.jar && \
+  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-storage-elasticsearch-aws/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-storage-elasticsearch-aws-$ZIPKIN_AWS_VERSION-module.jar > elasticsearch-aws.jar && \
   curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-storage-xray/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-storage-xray-$ZIPKIN_AWS_VERSION-module.jar > xray.jar && \
   echo > .xray_profile && \
   unzip sqs.jar -d sqs && \
   unzip kinesis.jar -d kinesis && \
+  unzip elasticsearch-aws.jar -d elasticsearch-aws && \
   unzip xray.jar -d xray && \
   rm sqs.jar && \
   rm kinesis.jar && \
+  rm elasticsearch-aws.jar && \
   rm xray.jar && \
   apk del unzip
 
-CMD test -n "$STORAGE_TYPE" && source .${STORAGE_TYPE}_profile; java ${JAVA_OPTS} -Dloader.path=sqs,kinesis,xray -Dspring.profiles.active=sqs,kinesis,xray -cp . org.springframework.boot.loader.PropertiesLauncher
+CMD test -n "$STORAGE_TYPE" && source .${STORAGE_TYPE}_profile; java ${JAVA_OPTS} -Dloader.path=sqs,kinesis,elasticsearch-aws,xray -Dspring.profiles.active=sqs,kinesis,elasticsearch-aws,xray -cp . org.springframework.boot.loader.PropertiesLauncher

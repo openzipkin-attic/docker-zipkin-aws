@@ -39,4 +39,4 @@ MAINTAINER OpenZipkin "http://zipkin.io/"
 
 COPY --from=0 /zipkin-aws/ /zipkin/
 
-ENV JAVA_OPTS="-Dloader.path=sqs,kinesis,elasticsearch-aws,xray -Dspring.profiles.active=sqs,kinesis,elasticsearch-aws,xray ${JAVA_OPTS}"
+ENV MODULE_OPTS="-Dloader.path=sqs,kinesis,elasticsearch-aws,xray -Dspring.profiles.active=sqs,kinesis,elasticsearch-aws,xray"

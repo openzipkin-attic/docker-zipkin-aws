@@ -34,7 +34,7 @@ RUN apk add curl unzip && \
   rm elasticsearch-aws.jar && \
   rm xray.jar
 
-FROM openzipkin/zipkin:2.13.0
+FROM openzipkin/zipkin:2.14.0
 MAINTAINER Zipkin "http://zipkin.apache.org/"
 
 COPY --from=0 /zipkin-aws/ /zipkin/

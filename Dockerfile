@@ -1,5 +1,5 @@
 #
-# Copyright 2015-2018 The OpenZipkin Authors
+# Copyright 2015-2019 The OpenZipkin Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 # in compliance with the License. You may obtain a copy of the License at
@@ -17,7 +17,7 @@ FROM alpine
 WORKDIR /zipkin-aws
 
 ENV ZIPKIN_AWS_REPO https://jcenter.bintray.com
-ENV ZIPKIN_AWS_VERSION 0.17.0
+ENV ZIPKIN_AWS_VERSION 0.17.1
 
 RUN apk add curl unzip && \
   curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar && \
@@ -34,8 +34,8 @@ RUN apk add curl unzip && \
   rm elasticsearch-aws.jar && \
   rm xray.jar
 
-FROM openzipkin/zipkin:2.13.0
-MAINTAINER Zipkin "http://zipkin.apache.org/"
+FROM openzipkin/zipkin:2.14.2
+MAINTAINER Zipkin "http://zipkin.io/"
 
 COPY --from=0 /zipkin-aws/ /zipkin/
 

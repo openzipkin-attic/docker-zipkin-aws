@@ -16,8 +16,8 @@ FROM alpine
 
 WORKDIR /zipkin-aws
 
-ENV ZIPKIN_AWS_REPO https://jcenter.bintray.com
-ENV ZIPKIN_AWS_VERSION 0.17.3
+ENV ZIPKIN_AWS_REPO https://repo1.maven.org/maven2
+ENV ZIPKIN_AWS_VERSION 0.17.4
 
 RUN apk add curl unzip && \
   curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar && \

@@ -17,7 +17,7 @@ FROM alpine
 WORKDIR /zipkin-aws
 
 ENV ZIPKIN_AWS_REPO https://repo1.maven.org/maven2
-ENV ZIPKIN_AWS_VERSION 0.17.4
+ENV ZIPKIN_AWS_VERSION 0.18.0
 
 RUN apk add curl unzip && \
   curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar && \
@@ -34,7 +34,7 @@ RUN apk add curl unzip && \
   rm elasticsearch-aws.jar && \
   rm xray.jar
 
-FROM openzipkin/zipkin:2.16.1
+FROM openzipkin/zipkin:2.16.2
 MAINTAINER Zipkin "https://zipkin.io/"
 
 COPY --from=0 /zipkin-aws/ /zipkin/

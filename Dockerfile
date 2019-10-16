@@ -17,13 +17,13 @@ FROM alpine
 WORKDIR /zipkin-aws
 
 ENV ZIPKIN_AWS_REPO https://repo1.maven.org/maven2
-ENV ZIPKIN_AWS_VERSION 0.18.0
+ENV ZIPKIN_AWS_VERSION 0.19.0
 
 RUN apk add curl unzip && \
-  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar && \
-  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-collector-kinesis/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-collector-kinesis-$ZIPKIN_AWS_VERSION-module.jar > kinesis.jar && \
-  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-storage-elasticsearch-aws/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-storage-elasticsearch-aws-$ZIPKIN_AWS_VERSION-module.jar > elasticsearch-aws.jar && \
-  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-autoconfigure-storage-xray/$ZIPKIN_AWS_VERSION/zipkin-autoconfigure-storage-xray-$ZIPKIN_AWS_VERSION-module.jar > xray.jar && \
+  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-module-collector-sqs/$ZIPKIN_AWS_VERSION/zipkin-module-collector-sqs-$ZIPKIN_AWS_VERSION-module.jar > sqs.jar && \
+  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-module-collector-kinesis/$ZIPKIN_AWS_VERSION/zipkin-module-collector-kinesis-$ZIPKIN_AWS_VERSION-module.jar > kinesis.jar && \
+  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-module-storage-elasticsearch-aws/$ZIPKIN_AWS_VERSION/zipkin-module-storage-elasticsearch-aws-$ZIPKIN_AWS_VERSION-module.jar > elasticsearch-aws.jar && \
+  curl -SL $ZIPKIN_AWS_REPO/io/zipkin/aws/zipkin-module-storage-xray/$ZIPKIN_AWS_VERSION/zipkin-module-storage-xray-$ZIPKIN_AWS_VERSION-module.jar > xray.jar && \
   echo > .xray_profile && \
   unzip sqs.jar -d sqs && \
   unzip kinesis.jar -d kinesis && \
@@ -34,7 +34,7 @@ RUN apk add curl unzip && \
   rm elasticsearch-aws.jar && \
   rm xray.jar
 
-FROM openzipkin/zipkin:2.16.2
+FROM openzipkin/zipkin:2.18.0
 MAINTAINER Zipkin "https://zipkin.io/"
 
 COPY --from=0 /zipkin-aws/ /zipkin/
